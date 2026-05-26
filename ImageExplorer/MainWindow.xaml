@@ -1,0 +1,23 @@
+<Window
+    x:Class="ImageExplorer.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Image Explorer" Width="1200" Height="760">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="12" RowSpacing="10">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Open Folder" Click="OpenFolder_Click"/>
+            <TextBlock x:Name="FolderNameText" VerticalAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="Thumbnail size" VerticalAlignment="Center"/>
+            <Slider x:Name="ThumbSizeSlider" Width="220" Minimum="64" Maximum="280" Value="128" ValueChanged="ThumbSizeSlider_ValueChanged"/>
+        </StackPanel>
+        <ScrollViewer Grid.Row="2">
+            <GridView x:Name="ImageGrid" IsItemClickEnabled="False">
+                <GridView.ItemsPanel>
+                    <ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="7"/></ItemsPanelTemplate>
+                </GridView.ItemsPanel>
+            </GridView>
+        </ScrollViewer>
+    </Grid>
+</Window>
