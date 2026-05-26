@@ -11,6 +11,8 @@
 #include <winrt/Windows.Storage.Pickers.h>
 #include <winrt/Windows.Storage.FileProperties.h>
 #include <winrt/Windows.Globalization.DateTimeFormatting.h>
+#include <tuple>
+#include <sstream>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -51,11 +53,44 @@ void MainWindow::Preferences_Click(IInspectable const&, RoutedEventArgs const&) 
     ContentDialog dialog; dialog.Title(box_value(L"Preferences")); dialog.Content(box_value(L"Preferences placeholder: object/face model, box style, and shortcut configuration.")); dialog.CloseButtonText(L"Close"); dialog.XamlRoot(Content().as<FrameworkElement>().XamlRoot()); dialog.ShowAsync();
 }
 void MainWindow::Exit_Click(IInspectable const&, RoutedEventArgs const&) { Close(); }
-void MainWindow::AnalyzeImage_Click(IInspectable const&, RoutedEventArgs const&) { AddDetectionBox(80, 60, 180, 180); AddDetectionBox(320, 120, 220, 150); }
-void MainWindow::DetectPeople_Click(IInspectable const&, RoutedEventArgs const&) { OverlayCanvas().Children().Clear(); AddDetectionBox(90, 80, 120, 250); AddDetectionBox(290, 75, 110, 260); }
-void MainWindow::DetectVehicles_Click(IInspectable const&, RoutedEventArgs const&) { OverlayCanvas().Children().Clear(); AddDetectionBox(110, 210, 260, 130); }
-void MainWindow::DetectAnimals_Click(IInspectable const&, RoutedEventArgs const&) { OverlayCanvas().Children().Clear(); AddDetectionBox(210, 160, 170, 120); }
-void MainWindow::DetectTextRegions_Click(IInspectable const&, RoutedEventArgs const&) { OverlayCanvas().Children().Clear(); AddDetectionBox(60, 40, 320, 70); AddDetectionBox(70, 330, 300, 62); }
+void MainWindow::AnalyzeImage_Click(IInspectable const&, RoutedEventArgs const&) {
+    ClearAndRenderDetections({
+        {72, 48, 128, 128, L"Face", 0.96},
+        {84, 178, 110, 170, L"Upper Body", 0.91},
+        {292, 118, 220, 156, L"Animal", 0.87},
+        {320, 280, 70, 44, L"Animal Head", 0.83},
+        {128, 340, 44, 44, L"Hand", 0.76}
+    });
+}
+void MainWindow::DetectPeople_Click(IInspectable const&, RoutedEventArgs const&) {
+    ClearAndRenderDetections({
+        {90, 80, 120, 250, L"Person", 0.92},
+        {290, 75, 110, 260, L"Person", 0.89}
+    });
+}
+void MainWindow::DetectVehicles_Click(IInspectable const&, RoutedEventArgs const&) { ClearAndRenderDetections({ {110, 210, 260, 130, L"Vehicle", 0.88} }); }
+void MainWindow::DetectAnimals_Click(IInspectable const&, RoutedEventArgs const&) {
+    ClearAndRenderDetections({
+        {210, 160, 170, 120, L"Animal", 0.9},
+        {258, 130, 66, 54, L"Animal Head", 0.84}
+    });
+}
+void MainWindow::DetectBodyParts_Click(IInspectable const&, RoutedEventArgs const&) {
+    ClearAndRenderDetections({
+        {92, 78, 112, 118, L"Head", 0.93},
+        {86, 198, 124, 118, L"Torso", 0.9},
+        {70, 212, 28, 92, L"Left Arm", 0.81},
+        {202, 214, 28, 92, L"Right Arm", 0.8},
+        {112, 322, 38, 82, L"Left Leg", 0.84},
+        {156, 324, 38, 82, L"Right Leg", 0.83}
+    });
+}
+void MainWindow::DetectTextRegions_Click(IInspectable const&, RoutedEventArgs const&) {
+    ClearAndRenderDetections({
+        {60, 40, 320, 70, L"Text", 0.86},
+        {70, 330, 300, 62, L"Text", 0.82}
+    });
+}
 void MainWindow::ThumbSizeSmall_Click(IInspectable const&, RoutedEventArgs const&) { SetThumbnailSize(96); }
 void MainWindow::ThumbSizeMedium_Click(IInspectable const&, RoutedEventArgs const&) { SetThumbnailSize(144); }
 void MainWindow::ThumbSizeLarge_Click(IInspectable const&, RoutedEventArgs const&) { SetThumbnailSize(220); }
@@ -123,10 +158,32 @@ void MainWindow::OverlayCanvas_PointerMoved(IInspectable const&, PointerRoutedEv
 }
 void MainWindow::OverlayCanvas_PointerReleased(IInspectable const&, PointerRoutedEventArgs const&) { m_isDrawing = false; }
 
-void MainWindow::AddDetectionBox(float x, float y, float w, float h) {
+void MainWindow::AddDetectionBox(float x, float y, float w, float h, hstring const& label, double confidence) {
     auto rect = Rectangle(); rect.Width(w); rect.Height(h); rect.Stroke(SolidColorBrush(Windows::UI::Colors::LimeGreen())); rect.StrokeThickness(2);
     rect.StrokeDashArray(DoubleCollection()); rect.StrokeDashArray().Append(4); rect.StrokeDashArray().Append(3);
     OverlayCanvas().Children().Append(rect); Canvas::SetLeft(rect, x); Canvas::SetTop(rect, y);
+
+    auto caption = TextBlock();
+    std::wstringstream ss;
+    ss << label.c_str();
+    if (confidence > 0.0) {
+        ss << L" (" << static_cast<int>(confidence * 100.0 + 0.5) << L"%)";
+    }
+    caption.Text(ss.str());
+    caption.Foreground(SolidColorBrush(Windows::UI::Colors::White()));
+    caption.Background(SolidColorBrush(Windows::UI::Colors::ForestGreen()));
+    caption.Padding(ThicknessHelper::FromLengths(6, 2, 6, 2));
+    caption.FontSize(12);
+    OverlayCanvas().Children().Append(caption);
+    Canvas::SetLeft(caption, x);
+    Canvas::SetTop(caption, std::max(0.0f, y - 22.0f));
+}
+
+void MainWindow::ClearAndRenderDetections(std::vector<std::tuple<float, float, float, float, hstring, double>> const& detections) {
+    OverlayCanvas().Children().Clear();
+    for (auto const& detection : detections) {
+        AddDetectionBox(std::get<0>(detection), std::get<1>(detection), std::get<2>(detection), std::get<3>(detection), std::get<4>(detection), std::get<5>(detection));
+    }
 }
 
 void MainWindow::RefreshThumbnailSizes() {
