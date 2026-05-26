@@ -12,6 +12,13 @@ struct MainWindow : MainWindowT<MainWindow> {
     void Preferences_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
     void Exit_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
     void AnalyzeImage_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+    void DetectPeople_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+    void DetectVehicles_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+    void DetectAnimals_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+    void DetectTextRegions_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+    void ThumbSizeSmall_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+    void ThumbSizeMedium_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+    void ThumbSizeLarge_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
     void ThumbSizeSlider_ValueChanged(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const&);
     void ImageGrid_ItemClick(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::Controls::ItemClickEventArgs const&);
     void ImageScrollViewer_PointerWheelChanged(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const&);
@@ -29,6 +36,9 @@ private:
     winrt::Windows::Foundation::IAsyncAction LoadFolderAsync(winrt::Windows::Storage::StorageFolder const& folder);
     winrt::Windows::Foundation::IAsyncOperation<winrt::Microsoft::UI::Xaml::Media::Imaging::ImageSource> CreateThumbnailAsync(winrt::Windows::Storage::StorageFile const& file);
     fire_and_forget ShowImageAsync(winrt::Windows::Storage::StorageFile const& file);
+    void RefreshThumbnailSizes();
+    void SetThumbnailSize(double size);
+    winrt::Windows::Foundation::IAsyncAction PopulateMetadataAsync(winrt::Windows::Storage::StorageFile const& file);
     void AddDetectionBox(float x, float y, float w, float h);
     void ShowBoxMenu(float x, float y);
     bool m_isPanning{ false }, m_isDrawing{ false };
