@@ -9,6 +9,18 @@
                 <MenuFlyoutItem Text="Open File" Click="OpenFile_Click"/>
                 <MenuFlyoutItem Text="Open Folder" Click="OpenFolderMenu_Click"/>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutSubItem Text="View">
+                    <MenuFlyoutItem Text="Small Thumbnails" Click="ThumbSizeSmall_Click"/>
+                    <MenuFlyoutItem Text="Medium Thumbnails" Click="ThumbSizeMedium_Click"/>
+                    <MenuFlyoutItem Text="Large Thumbnails" Click="ThumbSizeLarge_Click"/>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSubItem Text="AI Detection">
+                    <MenuFlyoutItem Text="Detect People (OpenCV HOG)" Click="DetectPeople_Click"/>
+                    <MenuFlyoutItem Text="Detect Vehicles (DNN/YOLO)" Click="DetectVehicles_Click"/>
+                    <MenuFlyoutItem Text="Detect Animals (DNN/YOLO)" Click="DetectAnimals_Click"/>
+                    <MenuFlyoutItem Text="Detect Text Regions (EAST/DB)" Click="DetectTextRegions_Click"/>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="Preferences" Click="Preferences_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="Exit" Click="Exit_Click"/>
@@ -25,14 +37,19 @@
             <TextBlock x:Name="FolderNameText" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <Grid Grid.Row="2" ColumnDefinitions="2*,3*" ColumnSpacing="12">
-            <ScrollViewer>
-                <GridView x:Name="ImageGrid" IsItemClickEnabled="True" ItemClick="ImageGrid_ItemClick">
-                    <GridView.ItemsPanel>
-                        <ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="7"/></ItemsPanelTemplate>
-                    </GridView.ItemsPanel>
-                </GridView>
-            </ScrollViewer>
+        <Grid Grid.Row="2" ColumnDefinitions="2*,3*,2*" ColumnSpacing="12">
+            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="4" Padding="6">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Text="Gallery (Dockable Pane)" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <ScrollViewer Grid.Row="1">
+                        <GridView x:Name="ImageGrid" IsItemClickEnabled="True" ItemClick="ImageGrid_ItemClick">
+                            <GridView.ItemsPanel>
+                                <ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="7"/></ItemsPanelTemplate>
+                            </GridView.ItemsPanel>
+                        </GridView>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
 
             <Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Padding="8">
                 <Grid>
@@ -52,6 +69,32 @@
                                     PointerReleased="OverlayCanvas_PointerReleased"/>
                         </Grid>
                     </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" BorderBrush="LightGray" BorderThickness="1" CornerRadius="4" Padding="6">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Text="Metadata (Dockable Pane)" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                    <TabView Grid.Row="1">
+                        <TabViewItem Header="General">
+                            <StackPanel Spacing="6" Padding="8">
+                                <TextBlock Text="File name" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="FileNameValue" Text="-" TextWrapping="WrapWholeWords"/>
+                                <TextBlock Text="Path" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="FilePathValue" Text="-" TextWrapping="WrapWholeWords"/>
+                            </StackPanel>
+                        </TabViewItem>
+                        <TabViewItem Header="Properties">
+                            <StackPanel Spacing="6" Padding="8">
+                                <TextBlock Text="Type" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="FileTypeValue" Text="-"/>
+                                <TextBlock Text="Size" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="FileSizeValue" Text="-"/>
+                                <TextBlock Text="Modified" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="FileModifiedValue" Text="-"/>
+                            </StackPanel>
+                        </TabViewItem>
+                    </TabView>
                 </Grid>
             </Border>
         </Grid>

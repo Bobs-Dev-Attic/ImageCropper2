@@ -10,6 +10,7 @@
 #include <winrt/Microsoft.UI.Xaml.Media.h>
 #include <winrt/Windows.Storage.Pickers.h>
 #include <winrt/Windows.Storage.FileProperties.h>
+#include <winrt/Windows.Globalization.DateTimeFormatting.h>
 
 using namespace winrt;
 using namespace Microsoft::UI::Xaml;
@@ -51,6 +52,13 @@ void MainWindow::Preferences_Click(IInspectable const&, RoutedEventArgs const&) 
 }
 void MainWindow::Exit_Click(IInspectable const&, RoutedEventArgs const&) { Close(); }
 void MainWindow::AnalyzeImage_Click(IInspectable const&, RoutedEventArgs const&) { AddDetectionBox(80, 60, 180, 180); AddDetectionBox(320, 120, 220, 150); }
+void MainWindow::DetectPeople_Click(IInspectable const&, RoutedEventArgs const&) { OverlayCanvas().Children().Clear(); AddDetectionBox(90, 80, 120, 250); AddDetectionBox(290, 75, 110, 260); }
+void MainWindow::DetectVehicles_Click(IInspectable const&, RoutedEventArgs const&) { OverlayCanvas().Children().Clear(); AddDetectionBox(110, 210, 260, 130); }
+void MainWindow::DetectAnimals_Click(IInspectable const&, RoutedEventArgs const&) { OverlayCanvas().Children().Clear(); AddDetectionBox(210, 160, 170, 120); }
+void MainWindow::DetectTextRegions_Click(IInspectable const&, RoutedEventArgs const&) { OverlayCanvas().Children().Clear(); AddDetectionBox(60, 40, 320, 70); AddDetectionBox(70, 330, 300, 62); }
+void MainWindow::ThumbSizeSmall_Click(IInspectable const&, RoutedEventArgs const&) { SetThumbnailSize(96); }
+void MainWindow::ThumbSizeMedium_Click(IInspectable const&, RoutedEventArgs const&) { SetThumbnailSize(144); }
+void MainWindow::ThumbSizeLarge_Click(IInspectable const&, RoutedEventArgs const&) { SetThumbnailSize(220); }
 
 IAsyncAction MainWindow::LoadFolderAsync(StorageFolder const& folder) {
     m_items.Clear(); m_files.clear();
@@ -78,9 +86,10 @@ fire_and_forget MainWindow::ShowImageAsync(StorageFile const& file) {
     auto stream = co_await file.OpenAsync(FileAccessMode::Read);
     auto bmp = BitmapImage(); co_await bmp.SetSourceAsync(stream);
     PreviewImage().Source(bmp); OverlayCanvas().Children().Clear();
+    co_await PopulateMetadataAsync(file);
 }
 
-void MainWindow::ThumbSizeSlider_ValueChanged(IInspectable const&, Controls::Primitives::RangeBaseValueChangedEventArgs const&) {}
+void MainWindow::ThumbSizeSlider_ValueChanged(IInspectable const&, Controls::Primitives::RangeBaseValueChangedEventArgs const&) { RefreshThumbnailSizes(); }
 void MainWindow::ImageGrid_ItemClick(IInspectable const&, ItemClickEventArgs const& args) {
     uint32_t i{}; if (m_items.IndexOf(args.ClickedItem(), i) && i < m_files.size()) { ShowImageAsync(m_files[i]); }
 }
@@ -118,6 +127,32 @@ void MainWindow::AddDetectionBox(float x, float y, float w, float h) {
     auto rect = Rectangle(); rect.Width(w); rect.Height(h); rect.Stroke(SolidColorBrush(Windows::UI::Colors::LimeGreen())); rect.StrokeThickness(2);
     rect.StrokeDashArray(DoubleCollection()); rect.StrokeDashArray().Append(4); rect.StrokeDashArray().Append(3);
     OverlayCanvas().Children().Append(rect); Canvas::SetLeft(rect, x); Canvas::SetTop(rect, y);
+}
+
+void MainWindow::RefreshThumbnailSizes() {
+    for (uint32_t i = 0; i < m_items.Size(); ++i) {
+        auto panel = m_items.GetAt(i).as<StackPanel>();
+        auto image = panel.Children().GetAt(0).as<Image>();
+        auto text = panel.Children().GetAt(1).as<TextBlock>();
+        image.Width(ThumbSizeSlider().Value());
+        image.Height(ThumbSizeSlider().Value());
+        text.MaxWidth(ThumbSizeSlider().Value());
+    }
+}
+
+void MainWindow::SetThumbnailSize(double size) {
+    ThumbSizeSlider().Value(size);
+    RefreshThumbnailSizes();
+}
+
+IAsyncAction MainWindow::PopulateMetadataAsync(StorageFile const& file) {
+    FileNameValue().Text(file.Name());
+    FilePathValue().Text(file.Path());
+    auto basicProps = co_await file.GetBasicPropertiesAsync();
+    FileSizeValue().Text(to_hstring(basicProps.Size()) + L" bytes");
+    Windows::Globalization::DateTimeFormatting::DateTimeFormatter dtf(L"{month.full} {day.integer}, {year.full} {hour.integer}:{minute.integer(2)}");
+    FileModifiedValue().Text(dtf.Format(basicProps.DateModified()));
+    FileTypeValue().Text(file.FileType());
 }
 void MainWindow::ShowBoxMenu(float, float) {
     MenuFlyout flyout; flyout.Items().Append(MenuFlyoutItem()); flyout.Items().GetAt(0).as<MenuFlyoutItem>().Text(L"Crop to Box");
