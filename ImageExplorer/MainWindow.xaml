@@ -18,6 +18,7 @@
                     <MenuFlyoutItem Text="Detect People (OpenCV HOG)" Click="DetectPeople_Click"/>
                     <MenuFlyoutItem Text="Detect Vehicles (DNN/YOLO)" Click="DetectVehicles_Click"/>
                     <MenuFlyoutItem Text="Detect Animals (DNN/YOLO)" Click="DetectAnimals_Click"/>
+                    <MenuFlyoutItem Text="Detect Body Parts (Pose Heuristics)" Click="DetectBodyParts_Click"/>
                     <MenuFlyoutItem Text="Detect Text Regions (EAST/DB)" Click="DetectTextRegions_Click"/>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator/>

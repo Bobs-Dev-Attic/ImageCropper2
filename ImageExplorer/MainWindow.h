@@ -15,6 +15,7 @@ struct MainWindow : MainWindowT<MainWindow> {
     void DetectPeople_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
     void DetectVehicles_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
     void DetectAnimals_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
+    void DetectBodyParts_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
     void DetectTextRegions_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
     void ThumbSizeSmall_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
     void ThumbSizeMedium_Click(winrt::Windows::Foundation::IInspectable const&, winrt::Microsoft::UI::Xaml::RoutedEventArgs const&);
@@ -39,7 +40,8 @@ private:
     void RefreshThumbnailSizes();
     void SetThumbnailSize(double size);
     winrt::Windows::Foundation::IAsyncAction PopulateMetadataAsync(winrt::Windows::Storage::StorageFile const& file);
-    void AddDetectionBox(float x, float y, float w, float h);
+    void AddDetectionBox(float x, float y, float w, float h, winrt::hstring const& label = L"Object", double confidence = 0.0);
+    void ClearAndRenderDetections(std::vector<std::tuple<float, float, float, float, winrt::hstring, double>> const& detections);
     void ShowBoxMenu(float x, float y);
     bool m_isPanning{ false }, m_isDrawing{ false };
     winrt::Windows::Foundation::Point m_lastPoint{}, m_startPoint{};

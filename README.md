@@ -21,3 +21,13 @@ msbuild ImageExplorer.sln /p:Configuration=Release /p:Platform=x64
 ```
 
 Output executable should be under `bin\Release\ImageExplorer.exe`.
+
+## Object detection features
+AI Detection actions now render labeled overlays with confidence values for face, body-part, people, animal, and text detections.
+
+Available actions:
+- **Find Faces and Objects**: combined detection of faces, body parts, and animals.
+- **Detect People**: person detections.
+- **Detect Body Parts**: head, torso, arms, and legs.
+- **Detect Animals**: animal and animal-head detections.
+- **Detect Text Regions**: text block detections.
