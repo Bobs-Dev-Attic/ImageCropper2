@@ -1,0 +1,1 @@
+namespace ImageExplorer { runtimeclass App : Microsoft.UI.Xaml.Application {} runtimeclass MainWindow : Microsoft.UI.Xaml.Window {} }
